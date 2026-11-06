@@ -35,7 +35,43 @@ class DepositoStrumenti:
             Funzione che legge tutti gli strumenti nel database
             :return: una lista con tutti gli strumenti presenti oppure None
         """
-        # TODO
+        conn = get_connection()
+
+        if conn is None:
+            return None
+
+        cursor = None
+
+        try:
+            cursor = conn.cursor(dictionary=True)
+            query = "SELECT * FROM strumento"
+            cursor.execute(query)
+
+            risultati = cursor.fetchall()
+
+            strumenti = []
+
+            for riga in risultati:
+                strumento = Strumento(
+                    riga["codice"],
+                    riga["tipo"],
+                    riga["marca"],
+                    riga["anno_acquisto"],
+                    riga["valore"],
+                    riga["disponibile"]
+                )
+                strumenti.append(strumento)
+
+            return strumenti
+
+        except Exception as e:
+            print(f"Errore durante il recupero degli strumenti: {e}")
+            return None
+
+        finally:
+            if cursor is not None:
+                cursor.close()
+            conn.close()
 
     def cerca_strumenti_per_tipo(self, tipo) -> list[Strumento] | None:
         """
@@ -43,4 +79,42 @@ class DepositoStrumenti:
             :param tipo: il tipo dello strumento (es. "Chitarra")
             :return: una lista con tutti gli strumenti del tipo indicato oppure None
         """
-        # TODO
+        conn = get_connection()
+
+        if conn is None:
+            return None
+
+        cursor = None
+
+        try:
+            cursor = conn.cursor(dictionary=True)
+
+            query = "SELECT * FROM strumento WHERE tipo = %s"
+            cursor.execute(query, (tipo,))
+
+            risultati = cursor.fetchall()
+
+            strumenti = []
+
+            for riga in risultati:
+                strumento = Strumento(
+                    riga["codice"],
+                    riga["tipo"],
+                    riga["marca"],
+                    riga["anno_acquisto"],
+                    riga["valore"],
+                    riga["disponibile"]
+                )
+
+                strumenti.append(strumento)
+
+            return strumenti
+
+        except Exception as e:
+            print(f"Errore durante la ricerca degli strumenti: {e}")
+            return None
+
+        finally:
+            if cursor is not None:
+                cursor.close()
+            conn.close()
